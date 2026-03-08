@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Smart City</title>
+      <style>
+    body{ font-family: Arial, sans-serif; background:#f6f7fb; margin:0; padding:24px;}
+    h1{ margin:0 0 16px 0;}
+    h2{ margin:0 0 10px 0;}
+    .container{ max-width: 1050px; margin:0 auto;}
+    .card{ background:#fff; border:1px solid #e6e6ef; border-radius:12px; padding:16px; margin:14px 0; box-shadow:0 2px 10px rgba(0,0,0,0.04);}
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px;}
+    .row{ margin:8px 0;}
+    label{ display:inline-block; width:140px; color:#333;}
+    input, select{ padding:8px 10px; border:1px solid #cfd3e1; border-radius:8px; width:260px;}
+    .btn{ margin-top:10px; padding:9px 14px; border:0; border-radius:10px; background:#2d6cdf; color:white; cursor:pointer;}
+    .btn:hover{ filter:brightness(0.95); }
+    .msg{ margin-top:10px; padding:10px 12px; border-radius:10px; background:#eef6ff; border:1px solid #cfe6ff; color:#0b3a6b;}
+    table{ width:100%; border-collapse:collapse; margin-top:10px; background:#fff;}
+    th, td{ padding:10px; border:1px solid #e6e6ef; text-align:left;}
+    th{ background:#f3f5ff; }
+    .muted{ color:#666; font-size: 13px;}
+  </style>
+</h:head>
+
+<h:body>
+<div class="container">
+  <h1>Smart City</h1>
+  <div class="muted">Unos vlasnika/auta, punjenje i pregled računa</div>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>Unos vlasnika</h2>
+      <h:form>
+        <div class="row"><label>Ime</label>
+          <h:inputText value="#{adminBean.ime}" />
+        </div>
+        <div class="row"><label>Prezime</label>
+          <h:inputText value="#{adminBean.prezime}" />
+        </div>
+        <div class="row"><label>Balans</label>
+  		<h:inputText value="#{adminBean.balans}" />
+		</div>
+        <h:column>
+		  <f:facet name="header">Balans</f:facet>
+		  <h:outputText value="#{a.vlasnik.balans}">
+		    <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+		  </h:outputText>
+		</h:column>
+        
+        <h:commandButton styleClass="btn" value="Sačuvaj vlasnika" action="#{adminBean.dodajVlasnika}" />
+        <h:panelGroup rendered="#{not empty adminBean.porukaAdmin}">
+          <div class="msg">#{adminBean.porukaAdmin}</div>
+        </h:panelGroup>
+      </h:form>
+    </div>
+    
+    <div class="card">
+  <h2>Dopuni balans</h2>
+  <h:form>
+    <div class="row"><label>Vlasnik</label>
+      <h:selectOneMenu value="#{adminBean.vlasnikDopunaId}">
+        <f:selectItem itemLabel="-- izaberi --" itemValue="#{null}" />
+        <f:selectItems value="#{adminBean.vlasnici}" var="v"
+                       itemValue="#{v.id}"
+                       itemLabel="#{v.id} - #{v.ime} #{v.prezime} (#{v.balans})"/>
+      </h:selectOneMenu>
+    </div>
+
+    <div class="row"><label>Iznos</label>
+      <h:inputText value="#{adminBean.iznosDopune}">
+        <f:convertNumber maxFractionDigits="2"/>
+      </h:inputText>
+    </div>
+
+    <h:commandButton styleClass="btn" value="Dopuni balans" action="#{adminBean.dopuniBalans}" />
+
+    <h:panelGroup rendered="#{not empty adminBean.porukaAdmin}">
+      <div class="msg">#{adminBean.porukaAdmin}</div>
+    </h:panelGroup>
+  </h:form>
+</div>
+
+    <div class="card">
+      <h2>Unos auta</h2>
+      <h:form>
+        <div class="row"><label>Vlasnik</label>
+          <h:selectOneMenu value="#{adminBean.vlasnikId}">
+            <f:selectItem itemLabel="-- izaberi --" itemValue="#{null}" />
+            <f:selectItems value="#{adminBean.vlasnici}" var="v"
+                           itemValue="#{v.id}" itemLabel="#{v.id} - #{v.ime} #{v.prezime}"/>
+          </h:selectOneMenu>
+        </div>
+        <div class="row"><label>Kapacitet</label>
+          <h:inputText value="#{adminBean.kapacitet}" />
+        </div>
+        <div class="row"><label>Energija</label>
+          <h:inputText value="#{adminBean.energijaTrenutna}" />
+        </div>
+        <h:commandButton styleClass="btn" value="Sačuvaj auto" action="#{adminBean.dodajAuto}" />
+      </h:form>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <h2>Lista auta</h2>
+    <h:dataTable value="#{adminBean.auta}" var="a">
+      <h:column><f:facet name="header">Auto ID</f:facet>#{a.id}</h:column>
+      <h:column><f:facet name="header">Kapacitet</f:facet>#{a.kapacitet}</h:column>
+      <h:column><f:facet name="header">Energija</f:facet>#{a.energijaTrenutna}</h:column>
+      <h:column><f:facet name="header">Vlasnik</f:facet>#{a.vlasnik.ime} #{a.vlasnik.prezime}</h:column>
+      <h:column><f:facet name="header">Balans</f:facet>#{a.vlasnik.balans}</h:column>
+    </h:dataTable>
+  </div>
+
+  <div class="card">
+    <h2>Punjenje</h2>
+    <h:form>
+      <div class="row"><label>Auto ID</label>
+        <h:inputText value="#{chargingBean.autoId}" />
+      </div>
+      <div class="row"><label>Stanica ID</label>
+       <h:selectOneMenu value="#{chargingBean.izabranaStanicaId}">
+    <f:selectItem itemLabel="-- izaberi --" itemValue="#{null}" />
+    <f:selectItems value="#{chargingBean.stanice}" var="s"
+      itemValue="#{s.id}"
+      itemLabel="ID #{s.id} | energija #{s.energijaTrenutna} | cena #{s.cenaPoJedinici}" />
+  </h:selectOneMenu>
+      </div>
+      <h:commandButton styleClass="btn" value="Napuni auto" action="#{chargingBean.napuniRedirect}" />
+
+      <h:panelGroup rendered="#{not empty chargingBean.poruka}">
+        <div class="msg">#{chargingBean.poruka}</div>
+      </h:panelGroup>
+    </h:form>
+  </div>
+  <div class="card">
+  <h2>Unos stanice</h2>
+  <h:form>
+    <div class="row"><label>Maks. energija</label>
+      <h:inputText value="#{adminBean.maxEnergija}" />
+    </div>
+    <div class="row"><label>Trenutna energija</label>
+      <h:inputText value="#{adminBean.energijaStanice}" />
+    </div>
+    <div class="row"><label>Cena po jedinici</label>
+      <h:inputText value="#{adminBean.cenaPoJedinici}" />
+    </div>
+    <div class="row"><label>Cena distribucije</label>
+      <h:inputText value="#{adminBean.cenaDistribucije}" />
+    </div>
+
+    <h:commandButton styleClass="btn" value="Sačuvaj stanicu"
+                     action="#{adminBean.dodajStanicu}" />
+
+    <h:panelGroup rendered="#{not empty adminBean.porukaAdmin}">
+      <div class="msg">#{adminBean.porukaAdmin}</div>
+    </h:panelGroup>
+  </h:form>
+</div>
+  
+
+  <div class="card">
+    <h2>Računi</h2>
+    <h:dataTable value="#{chargingBean.racuni}" var="r">
+      <h:column><f:facet name="header">ID</f:facet>#{r.id}</h:column>
+      <h:column><f:facet name="header">Auto</f:facet>#{r.auto.id}</h:column>
+      <h:column><f:facet name="header">Stanica</f:facet>#{r.stanica.id}</h:column>
+      <h:column><f:facet name="header">Vlasnik</f:facet>#{r.auto.vlasnik.ime} #{r.auto.vlasnik.prezime}</h:column>
+      <h:column><f:facet name="header">Količina</f:facet>#{r.kolicina}</h:column>
+      <h:column><f:facet name="header">Ukupno</f:facet>#{r.ukupno}</h:column>
+      <h:column><f:facet name="header">Vreme</f:facet>
+        <h:outputText value="#{r.vreme}">
+          <f:convertDateTime pattern="dd.MM.yyyy HH:mm:ss"/>
+        </h:outputText>
+      </h:column>
+    </h:dataTable>
+  </div>
+
+</div>
+</h:body>
+
+</html>
